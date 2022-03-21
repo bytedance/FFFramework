@@ -3,7 +3,16 @@
 
 #include <stdlib.h>
 #include <windows.h>
-
+extern "C"
+{
+#include <libavutil/avutil.h>
+#include <libavutil/buffer.h>
+#include <libavutil/avassert.h>
+#include <libavutil/intreadwrite.h>
+#include <libavcodec/avcodec.h>
+}
+#include "get_bits.h"
+#include "common.h"
 enum
 {
 	MS_H264_MAX_SPS_COUNT = 32,
@@ -451,16 +460,7 @@ static const BOOL  CheckCode(const UINT8* s, INT32 size)
 		return FALSE;
 	return s[2] == 1 || (s[2] == 0 && s[3] == 1);
 }
-static const INT32 FindCodeSize(const UINT8* s, UINT32 size)
-{
-	if (size < 4 || s[0] != 0 || s[1] != 0)
-		return 0;
-	if (s[2] == 1)
-		return 3;
-	if ((s[2] == 0 && s[3] == 1))
-		return 4;
-	return 0;
-}
+FFFRAMEWORK_API const INT32 FindCodeSize(const UINT8* s, UINT32 size);
 static const UINT8* FindCode(const UINT8* s, const UINT8* end)
 {
 	const UINT8* a = s + 4 - ((INT_PTR)s & 3);
@@ -498,13 +498,8 @@ static const UINT8* FindCode(const UINT8* s, const UINT8* end)
 
 	return end + 3;
 }
-static const UINT8* FindRange(const UINT8* s, const UINT8* end)
-{
-	const UINT8* out = FindCode(s, end);
-	if (s < out && out < end && !out[-1])
-		out--;
-	return out;
-}
+
+FFFRAMEWORK_API const UINT8* FindRange(const UINT8* s, const UINT8* end);
 
 static UINT8* FindCodeW(UINT8* s, UINT8* end)
 {

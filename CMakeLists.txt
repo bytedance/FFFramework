@@ -1,7 +1,12 @@
 cmake_minimum_required(VERSION 3.10)
 
 set(PROJECT_NAME FFFramework)
-
+if(NOT ffmpeg_include)
+    set(ffmpeg_include "..\\Dependencies\\win32\\32\\include")
+endif()
+if(NOT ffmpeg_avutil_lib)
+    set(ffmpeg_avutil_lib "..\\..\\Dependencies\\win32\\32\\lib\\avutil.lib")
+endif()
 #add the executable
 
 set(CMAKE_CXX_STANDARD 14)
@@ -15,6 +20,7 @@ add_library(${PROJECT_NAME} SHARED ${SOURCE_SET})
 
 target_include_directories(${PROJECT_NAME}
 PUBLIC .
+${ffmpeg_include}
 )
 
 if(MSVC)
@@ -46,8 +52,16 @@ if(MSVC)
                 >
             )
 endif()
+message("default ffmpeg_include ${ffmpeg_include}")
+message("default ffmpeg_avutil_lib ${ffmpeg_avutil_lib}")
 
-install_datatarget(${PROJECT_NAME} ".")
+
+set(ADDITIONAL_LIBRARY_DEPENDENCIES
+    ${ffmpeg_avutil_lib}
+)
+
+
+target_link_libraries(${PROJECT_NAME} PUBLIC "${ADDITIONAL_LIBRARY_DEPENDENCIES}")
 
 if(MSVC)
   add_definitions(/MP)
